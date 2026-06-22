@@ -1,0 +1,69 @@
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(10deg); }
+}
+
+.leaf-pattern {
+  background-image: radial-gradient(#172c21 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+  opacity: 0.05;
+}
+
+/* ── Ant Design Tabs overrides ── */
+.dayma-tabs .ant-tabs-nav::before {
+  border-bottom: none !important;
+}
+
+.dayma-tabs .ant-tabs-nav-list {
+  background: #e7e5e4;
+  border-radius: 10px;
+  padding: 4px;
+  border: 1px solid rgba(214,211,209,0.4);
+}
+
+.dayma-tabs .ant-tabs-tab {
+  padding: 8px 32px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.04em !important;
+  color: #78716c !important;
+  margin: 0 !important;
+  transition: color 0.2s !important;
+}
+
+.dayma-tabs .ant-tabs-tab:hover {
+  color: #172c21 !important;
+}
+
+.dayma-tabs .ant-tabs-tab-active {
+  background: #172c21 !important;
+  box-shadow: 0 2px 8px rgba(23,44,33,0.25) !important;
+}
+
+.dayma-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #fff !important;
+}
+
+.dayma-tabs .ant-tabs-ink-bar {
+  display: none !important;
+}
+
+.dayma-tabs .ant-tabs-nav-wrap {
+  justify-content: center;
+}
+
+.dayma-tabs .ant-tabs-nav {
+  margin-bottom: 32px !important;
+}
+
+/* ── Form ── */
+.ant-form-item-label {
+  padding-bottom: 4px !important;
+}
+
+.ant-input-affix-wrapper:focus-within,
+.ant-input-affix-wrapper-focused {
+  border-color: #172c21 !important;
+  box-shadow: 0 0 0 2px rgba(23,44,33,0.1) !important;
+}
