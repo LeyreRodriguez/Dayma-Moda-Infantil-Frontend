@@ -1,0 +1,278 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { productService } from "../api/services/productService";
+import { collectionService } from "../api/services/collectionService";
+import { sizeService } from "../api/services/sizeService";
+import type { Product } from "../types/product";
+import type { Collection } from "../types/collection";
+import type { ProductImage } from "../types/productImage";
+import type { ProductSize } from "../types/productSize";
+import ProductCard from "../components/common/ProductCard";
+import ProductImageCarousel from "../components/common/ProductImageCarousel";
+
+export default function ProductDetail() {
+  const { code } = useParams<{ code: string }>();
+  const navigate = useNavigate();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [collection, setCollection] = useState<Collection | null>(null);
+  const [productImages, setProductImages] = useState<ProductImage[]>([]);
+  const [productSizes, setProductSizes] = useState<ProductSize[]>([]);
+  const [allSizes, setAllSizes] = useState<string[]>([]);
+  const [related, setRelated] = useState<Product[]>([]);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!code) return;
+    setLoading(true);
+
+    Promise.all([
+      productService.getByCode(code),
+      collectionService.getCollectionByProduct(code),
+      productService.getImageByProductCode(code),
+      productService.getSizeByProductCode(code),
+      sizeService.getAll(),
+    ])
+      .then(([prod, coll, imgs, sizes, all]) => {
+        setProduct(prod);
+        setCollection(coll);
+        setProductImages(imgs);
+        setProductSizes(sizes);
+        setAllSizes(all.map((s) => s.size));
+        if (sizes.length > 0) setSelectedSize(sizes[0].size.size);
+        return productService.getAll({ collection: coll.name, limit: 5 });
+      })
+      .then((res) => {
+        setRelated((res.content ?? []).filter((p) => p.code !== code));
+      })
+      .catch(() => navigate("/collection"))
+      .finally(() => setLoading(false));
+  }, [code, navigate]);
+
+  if (loading || !product) {
+    return (
+      <div className="bg-background min-h-screen flex items-center justify-center">
+        <span className="material-symbols-outlined text-4xl text-primary animate-spin">
+          refresh
+        </span>
+      </div>
+    );
+  }
+
+  const allImages = productImages.map((pi) => pi.image);
+  const collectionName =
+    collection?.name ?? product.collectionName ?? "Colección";
+  const availableSizes = new Set(productSizes.map((ps) => ps.size.size));
+
+  return (
+    <div className="bg-background text-on-background font-body-md overflow-x-hidden selection:bg-primary/10 selection:text-primary">
+      <main className="pt-32 pb-section-padding px-margin-mobile md:px-margin-desktop max-w-[1440px] mx-auto">
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-2 mb-12 text-on-surface-variant font-label-md uppercase tracking-wider">
+          <Link className="hover:text-primary transition-colors" to="/">
+            Home
+          </Link>
+          <span className="material-symbols-outlined text-xs">
+            chevron_right
+          </span>
+          <Link
+            className="hover:text-primary transition-colors"
+            to="/collection"
+          >
+            Collections
+          </Link>
+          <span className="material-symbols-outlined text-xs">
+            chevron_right
+          </span>
+          <span className="text-primary font-bold">{product.name}</span>
+        </nav>
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+          {/* Left: Images */}
+          <div className="md:col-span-7">
+            <ProductImageCarousel images={allImages} name={product.name} />
+          </div>
+
+          {/* Right: Product Info */}
+          <div className="md:col-span-5 flex flex-col gap-10 sticky top-28 self-start">
+            <header>
+              <section className="border-y border-outline-variant/30 py-8">
+                <span className="material-symbols-outlined">
+                  {collectionName}
+                </span>
+                <p className="font-body-md text-on-surface-variant leading-relaxed">
+                  {product.description}
+                </p>
+                <h1 className="font-headline-xl text-primary mt-2">
+                  {product.name}
+                </h1>
+              </section>
+
+              <p className="font-headline-md text-primary mt-6">
+                {product.price.toFixed(2).replace(".", ",")}€
+              </p>
+              <div className="flex items-center gap-4 mt-6">
+                <div className="flex text-primary">
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <span
+                      key={i}
+                      className="material-symbols-outlined text-lg"
+                      style={{
+                        fontVariationSettings:
+                          i < (product.rating ?? 4) ? "'FILL' 1" : "'FILL' 0",
+                      }}
+                    >
+                      star
+                    </span>
+                  ))}
+                </div>
+                <span className="text-on-surface-variant font-label-md">
+                  {product.reviews ?? 0} testimonios
+                </span>
+              </div>
+            </header>
+
+            <section>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-label-md text-primary uppercase tracking-widest">
+                  Selecciona Talla
+                </h3>
+              </div>
+              <div className="grid grid-cols-4 gap-3">
+                {allSizes.map((s) => {
+                  const available = availableSizes.has(s);
+                  return (
+                    <div
+                      key={s}
+                      className={
+                        available
+                          ? "relative"
+                          : "relative opacity-30 cursor-not-allowed"
+                      }
+                    >
+                      {available ? (
+                        <>
+                          <input
+                            className="peer hidden"
+                            id={`size-${s}`}
+                            name="size"
+                            type="radio"
+                            checked={selectedSize === s}
+                            onChange={() => setSelectedSize(s)}
+                          />
+                          <label
+                            className="flex items-center justify-center h-14 rounded border cursor-pointer transition-all font-label-md peer-checked:bg-primary peer-checked:text-on-primary peer-checked:border-primary border-outline text-on-surface-variant hover:border-primary"
+                            htmlFor={`size-${s}`}
+                          >
+                            {s}
+                          </label>
+                        </>
+                      ) : (
+                        <span className="flex items-center justify-center h-14 rounded border border-outline text-on-surface-variant font-label-md bg-surface-variant line-through">
+                          {s}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <div className="flex flex-col gap-4">
+              <button className="w-full bg-primary text-on-primary py-6 rounded-lg font-headline-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-4">
+                <span className="material-symbols-outlined">shopping_bag</span>
+                Añadir al carrito
+              </button>
+              <p className="text-center font-caption text-on-surface-variant italic">
+                Pago directo en nuestra tienda al momento de la recogida
+              </p>
+            </div>
+
+            <section className="mt-4 p-8 bg-surface-container rounded-xl border border-outline-variant/30 relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-[60%_40%_70%_30%_/_40%_50%_60%_40%]" />
+              <h3 className="font-headline-md text-primary mb-6">
+                Recogida en Tienda
+              </h3>
+              <div className="space-y-6">
+                <div className="flex gap-5">
+                  <div className="w-10 h-10 bg-surface-container-lowest rounded-full flex items-center justify-center shrink-0 shadow-sm text-primary">
+                    <span className="material-symbols-outlined text-lg">
+                      location_on
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-label-md text-primary">
+                      Dayma Moda Infantil
+                    </p>
+                    <p className="font-body-md text-on-surface-variant">
+                      C. Matías Zurita, 11, 35200 Telde, Las Palmas
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-5">
+                  <div className="w-10 h-10 bg-surface-container-lowest rounded-full flex items-center justify-center shrink-0 shadow-sm text-primary">
+                    <span className="material-symbols-outlined text-lg">
+                      schedule
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-label-md text-primary">
+                      Horario de Atención
+                    </p>
+                    <p className="font-body-md text-on-surface-variant">
+                      L-S: 10:00 - 13:00 / S: 17:00 - 20:00
+                    </p>
+                  </div>
+                </div>
+                <a
+                  className="mt-6 block rounded-lg overflow-hidden h-32 relative group"
+                  href="https://www.google.com/maps/place//data=!4m2!3m1!1s0xc4097e45e7a4431:0x6226b676ab588a99?sa=X&ved=1t:8290&ictx=111"
+                >
+                  <iframe
+                    src="https://maps.google.com/maps?q=Dayma+Moda+Infantil&output=embed"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0, minHeight: "400px" }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Ubicación Dayma"
+                    className="grayscale-[20%] hover:grayscale-0 transition-all duration-700"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-[2px] group-hover:bg-transparent group-hover:backdrop-blur-none transition-all">
+                    <div className="bg-surface/90 px-6 py-2 rounded-full font-label-md text-primary shadow-xl">
+                      Ver ubicación
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+
+      {/* Divider */}
+      <div className="w-full py-12 flex justify-center items-center opacity-30">
+        <div className="h-px w-24 bg-primary" />
+        <span className="material-symbols-outlined text-primary mx-4">eco</span>
+        <div className="h-px w-24 bg-primary" />
+      </div>
+
+      {/* Related Products */}
+      {related.length > 0 && (
+        <section className="bg-surface-container-low py-section-padding px-margin-mobile md:px-margin-desktop">
+          <div className="max-w-[1440px] mx-auto">
+            <h2 className="font-display-lg text-primary text-center mb-16 italic">
+              También te puede encantar...
+            </h2>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-gutter">
+              {related.map((p) => (
+                <ProductCard key={p.code} product={p} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
