@@ -4,7 +4,7 @@ import Footer from "./Footer";
 
 export default function AppLayout() {
   return (
-    <div className="bg-background text-on-surface font-body-md overflow-x-hidden min-h-screen">
+    <div className="bg-background text-on-surface font-body-md min-h-screen">
       <Header />
       <Outlet />
       <Footer />

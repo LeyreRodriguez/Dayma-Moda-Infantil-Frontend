@@ -22,16 +22,16 @@ export default function FilterSidebar({ filters, onFiltersChange, categories, si
   };
 
   return (
-    <div className="sticky top-28 space-y-10">
+    <div className="sticky top-28 max-md:static space-y-10">
       <h3 className="font-headline-md text-headline-md text-primary mb-6">Filtros</h3>
 
       <div className="mb-8">
         <p className="font-label-md text-label-md text-secondary uppercase mb-4 tracking-wider">Categoría</p>
         <ul className="space-y-3">
           {categories.map((cat) => (
-            <li key={cat.code} className="flex items-center gap-3">
+            <li key={cat.code} className="flex items-center gap-3 min-h-[44px]">
               <input
-                className="rounded-sm border-outline text-primary focus:ring-primary-container"
+                className="rounded-sm border-outline text-primary focus:ring-primary-container w-4 h-4"
                 id={`cat-${cat.code}`}
                 type="checkbox"
                 checked={(filters.categories ?? []).includes(cat.code)}
@@ -54,7 +54,7 @@ export default function FilterSidebar({ filters, onFiltersChange, categories, si
               <button
                 key={size.code}
                 type="button"
-                className={`px-3 py-2 text-center rounded-sm font-label-md text-label-md transition-colors ${
+                className={`px-3 py-3 text-center rounded-sm font-label-md text-label-md transition-colors ${
                   selected
                     ? "border border-primary bg-primary-container/10 text-primary"
                     : "border border-outline-variant hover:bg-surface-container-high"
@@ -73,7 +73,7 @@ export default function FilterSidebar({ filters, onFiltersChange, categories, si
         <p className="font-label-md text-label-md text-secondary uppercase mb-4 tracking-wider">Rango de Precio</p>
         <div className="flex items-center gap-3">
           <input
-            className="w-full border border-outline-variant rounded-sm px-3 py-2 font-body-md text-body-md bg-transparent"
+            className="w-full border border-outline-variant rounded-sm px-4 py-3 font-body-md text-body-md bg-transparent"
             type="number"
             placeholder="Min"
             min={0}
@@ -87,7 +87,7 @@ export default function FilterSidebar({ filters, onFiltersChange, categories, si
           />
           <span className="text-on-surface-variant">—</span>
           <input
-            className="w-full border border-outline-variant rounded-sm px-3 py-2 font-body-md text-body-md bg-transparent"
+            className="w-full border border-outline-variant rounded-sm px-4 py-3 font-body-md text-body-md bg-transparent"
             type="number"
             placeholder="Max"
             min={0}

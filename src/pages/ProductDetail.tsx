@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { Modal } from "antd";
 import { productService } from "../api/services/productService";
 import { collectionService } from "../api/services/collectionService";
 import { sizeService } from "../api/services/sizeService";
+import { useCart } from "../hooks/useCart";
+import { useAuth } from "../hooks/useAuth";
 import type { Product } from "../types/product";
 import type { Collection } from "../types/collection";
 import type { ProductImage } from "../types/productImage";
@@ -13,6 +16,9 @@ import ProductImageCarousel from "../components/common/ProductImageCarousel";
 export default function ProductDetail() {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
+  const { addItem, openCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [collection, setCollection] = useState<Collection | null>(null);
   const [productImages, setProductImages] = useState<ProductImage[]>([]);
@@ -21,6 +27,7 @@ export default function ProductDetail() {
   const [related, setRelated] = useState<Product[]>([]);
   const [selectedSize, setSelectedSize] = useState("");
   const [loading, setLoading] = useState(true);
+  const [addedFeedback, setAddedFeedback] = useState(false);
 
   useEffect(() => {
     if (!code) return;
@@ -39,7 +46,6 @@ export default function ProductDetail() {
         setProductImages(imgs);
         setProductSizes(sizes);
         setAllSizes(all.map((s) => s.size));
-        if (sizes.length > 0) setSelectedSize(sizes[0].size.size);
         return productService.getAll({ collection: coll.name, limit: 5 });
       })
       .then((res) => {
@@ -138,7 +144,7 @@ export default function ProductDetail() {
                   Selecciona Talla
                 </h3>
               </div>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                 {allSizes.map((s) => {
                   const available = availableSizes.has(s);
                   return (
@@ -179,16 +185,47 @@ export default function ProductDetail() {
             </section>
 
             <div className="flex flex-col gap-4">
-              <button className="w-full bg-primary text-on-primary py-6 rounded-lg font-headline-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-4">
-                <span className="material-symbols-outlined">shopping_bag</span>
-                Añadir al carrito
+              <button
+                onClick={() => {
+                  if (!selectedSize) return;
+                  if (!isAuthenticated) {
+                    setShowAuthModal(true);
+                    return;
+                  }
+                  const sizeCode =
+                    productSizes.find((ps) => ps.size.size === selectedSize)
+                      ?.size.code ?? "";
+                  addItem({
+                    product,
+                    quantity: 1,
+                    selectedSize,
+                    sizeCode,
+                  });
+                  setAddedFeedback(true);
+                  setTimeout(() => setAddedFeedback(false), 2000);
+                }}
+                disabled={!selectedSize}
+                className="w-full bg-primary text-on-primary py-6 rounded-lg font-headline-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <span className="material-symbols-outlined">
+                  {addedFeedback ? "check" : "shopping_bag"}
+                </span>
+                {addedFeedback ? "¡Añadido!" : "Añadir al carrito"}
               </button>
+              {addedFeedback && (
+                <button
+                  onClick={openCart}
+                  className="w-full text-center font-label-md text-primary underline underline-offset-2 hover:opacity-70 transition-opacity"
+                >
+                  Ver carrito
+                </button>
+              )}
               <p className="text-center font-caption text-on-surface-variant italic">
                 Pago directo en nuestra tienda al momento de la recogida
               </p>
             </div>
 
-            <section className="mt-4 p-8 bg-surface-container rounded-xl border border-outline-variant/30 relative overflow-hidden">
+            <section className="mt-4 p-4 sm:p-6 md:p-8 bg-surface-container rounded-xl border border-outline-variant/30 relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-[60%_40%_70%_30%_/_40%_50%_60%_40%]" />
               <h3 className="font-headline-md text-primary mb-6">
                 Recogida en Tienda
@@ -225,7 +262,7 @@ export default function ProductDetail() {
                   </div>
                 </div>
                 <a
-                  className="mt-6 block rounded-lg overflow-hidden h-32 relative group"
+                  className="mt-6 block rounded-lg overflow-hidden min-h-[200px] md:h-32 relative group"
                   href="https://www.google.com/maps/place//data=!4m2!3m1!1s0xc4097e45e7a4431:0x6226b676ab588a99?sa=X&ved=1t:8290&ictx=111"
                 >
                   <iframe
@@ -265,7 +302,7 @@ export default function ProductDetail() {
             <h2 className="font-display-lg text-primary text-center mb-16 italic">
               También te puede encantar...
             </h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-gutter">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
               {related.map((p) => (
                 <ProductCard key={p.code} product={p} />
               ))}
@@ -273,6 +310,39 @@ export default function ProductDetail() {
           </div>
         </section>
       )}
+
+      <Modal
+        open={showAuthModal}
+        onCancel={() => setShowAuthModal(false)}
+        footer={null}
+        centered
+        width={400}
+      >
+        <div className="flex flex-col items-center gap-6 py-6">
+          <span className="material-symbols-outlined text-5xl text-primary">
+            login
+          </span>
+          <p className="font-headline-md text-primary text-center">
+            Inicia sesión para añadir productos al carrito
+          </p>
+          <p className="font-body-md text-on-surface-variant text-center">
+            Necesitas tener una cuenta para poder realizar compras.
+          </p>
+          <Link
+            to="/auth"
+            onClick={() => setShowAuthModal(false)}
+            className="w-full bg-primary text-on-primary py-4 rounded-lg font-headline-md text-center hover:opacity-90 transition-opacity"
+          >
+            Iniciar Sesión
+          </Link>
+          <button
+            onClick={() => setShowAuthModal(false)}
+            className="font-label-md text-on-surface-variant hover:text-primary transition-colors underline underline-offset-2"
+          >
+            Seguir explorando
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

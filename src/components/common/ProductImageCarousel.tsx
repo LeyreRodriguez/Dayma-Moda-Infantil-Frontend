@@ -31,13 +31,13 @@ export default function ProductImageCarousel({ images, name }: Props) {
           <>
             <button
               onClick={prev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface/80 backdrop-blur-sm text-on-surface flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-surface shadow-lg"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-surface/80 backdrop-blur-sm text-on-surface flex items-center justify-center md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-surface shadow-lg"
             >
               <span className="material-symbols-outlined">chevron_left</span>
             </button>
             <button
               onClick={next}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface/80 backdrop-blur-sm text-on-surface flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-surface shadow-lg"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-surface/80 backdrop-blur-sm text-on-surface flex items-center justify-center md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-surface shadow-lg"
             >
               <span className="material-symbols-outlined">chevron_right</span>
             </button>
@@ -46,8 +46,8 @@ export default function ProductImageCarousel({ images, name }: Props) {
                 <button
                   key={i}
                   onClick={() => setCurrent(i)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    i === current ? "bg-primary w-6" : "bg-on-surface/40 hover:bg-on-surface/60"
+                  className={`w-3 h-3 rounded-full transition-all flex items-center justify-center ${
+                    i === current ? "bg-primary w-8" : "bg-on-surface/40 hover:bg-on-surface/60"
                   }`}
                 />
               ))}

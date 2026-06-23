@@ -19,8 +19,6 @@ export default function LoginForm() {
     }
   };
 
- 
-
   return (
     <div className="space-y-2">
       <header className="text-center mb-8">
@@ -30,11 +28,26 @@ export default function LoginForm() {
         <p className="text-stone-500 text-sm">Vuelve a tu hogar mágico</p>
       </header>
 
-      <Form form={form} layout="vertical" requiredMark={false} onFinish={handleLogin}>
+      <Form
+        form={form}
+        layout="vertical"
+        requiredMark={false}
+        onFinish={handleLogin}
+      >
         <Form.Item
-          label={<span className="text-xs font-semibold tracking-widest uppercase text-stone-500">Tu Correo Mágico</span>}
+          label={
+            <span className="text-xs font-semibold tracking-widest uppercase text-stone-500">
+              Tu Correo Mágico
+            </span>
+          }
           name="email"
-          rules={[{ required: true, type: "email", message: "Ingresa un correo válido" }]}
+          rules={[
+            {
+              required: true,
+              type: "email",
+              message: "Ingresa un correo válido",
+            },
+          ]}
         >
           <Input
             prefix={<MdEmail className="text-stone-400 text-base" />}
@@ -45,7 +58,11 @@ export default function LoginForm() {
         </Form.Item>
 
         <Form.Item
-          label={<span className="text-xs font-semibold tracking-widest uppercase text-stone-500">Llave Secreta</span>}
+          label={
+            <span className="text-xs font-semibold tracking-widest uppercase text-stone-500">
+              Llave Secreta
+            </span>
+          }
           name="password"
           rules={[{ required: true, message: "Ingresa tu contraseña" }]}
         >
@@ -58,8 +75,11 @@ export default function LoginForm() {
         </Form.Item>
 
         <div className="flex justify-end -mt-2 mb-4">
-          <a href="#" className="text-xs font-semibold text-rose-700 hover:underline">
-            ¿Olvidaste tu llave?
+          <a
+            href="#"
+            className="text-xs font-semibold text-rose-700 hover:underline"
+          >
+            ¿Olvidaste tu contraseña?
           </a>
         </div>
 

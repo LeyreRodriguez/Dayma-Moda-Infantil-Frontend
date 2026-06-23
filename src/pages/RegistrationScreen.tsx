@@ -73,7 +73,7 @@ export default function RegistrationScreen() {
             <MdEco className="absolute top-10 right-10 text-green-900/10" style={{ fontSize: 80 }} />
           </div>
 
-          <div className="p-8 md:p-12 flex flex-col justify-center bg-white/85 backdrop-blur-xl">
+          <div className="p-6 md:p-12 flex flex-col justify-center bg-white/85 backdrop-blur-xl">
             <Tabs
               defaultActiveKey="login"
               centered

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { productService } from "../api/services/productService";
 import { categoryService } from "../api/services/categoryService";
 import { sizeService } from "../api/services/sizeService";
@@ -18,11 +19,15 @@ const SORT_OPTIONS = [
 ];
 
 export default function Shop() {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<ProductFilters>({});
+  const [filters, setFilters] = useState<ProductFilters>(() => {
+    const collection = searchParams.get("collection");
+    return collection ? { collection } : {};
+  });
   const [sortBy, setSortBy] = useState("newest");
   const [categories, setCategories] = useState<Category[]>([]);
   const [sizes, setSizes] = useState<Size[]>([]);
@@ -91,7 +96,7 @@ export default function Shop() {
 
   return (
     <div className="bg-background text-on-background parchment-texture min-h-screen selection:bg-secondary-container selection:text-on-secondary-container">
-      <header className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto">
+      <header className="relative pt-24 md:pt-40 pb-16 md:pb-32 overflow-hidden px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-12">
           <div className="z-10 space-y-6">
             <span className="font-label-md text-label-md text-secondary tracking-[0.2em] uppercase">
@@ -105,7 +110,7 @@ export default function Shop() {
             </p>
             <div className="h-[1px] w-24 bg-tertiary-fixed-dim" />
           </div>
-          <div className="relative h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-2xl">
+          <div className="relative h-[250px] md:h-[400px] lg:h-[500px] rounded-xl overflow-hidden shadow-2xl">
             <img
               className="w-full h-full object-cover"
               src={featuredProduct?.imageUrl}
@@ -229,7 +234,7 @@ export default function Shop() {
           {totalPages > 1 && (
             <div className="mt-24 flex flex-col items-center gap-8">
               <button
-                className="px-12 py-4 border border-primary text-primary font-label-md text-label-md rounded-full hover:bg-primary hover:text-on-primary transition-all duration-300 active:scale-95"
+                className="px-6 md:px-12 py-4 border border-primary text-primary font-label-md text-label-md rounded-full hover:bg-primary hover:text-on-primary transition-all duration-300 active:scale-95"
                 onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               >
                 Ver Más Tesoros

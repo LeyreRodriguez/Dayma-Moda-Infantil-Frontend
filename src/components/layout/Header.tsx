@@ -1,11 +1,23 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useCart } from "../../hooks/useCart";
 
 export default function Header() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { openCart, itemCount } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [hasToken, setHasToken] = useState(
     !!localStorage.getItem("auth_token"),
   );
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const isActive = (path: string) =>
+    path === "/"
+      ? location.pathname === "/"
+      : location.pathname.startsWith(path);
+
+  const closeMenu = () => setMenuOpen(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -20,61 +32,122 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop transition-all duration-500 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 ${
+      className={`fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop transition-all duration-500 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 ${
         scrolled ? "py-2 shadow-sm bg-surface/95" : "py-4"
       }`}
     >
-      <div className="flex items-center gap-6 ml-10">
-        <Link to="/" className="flex items-center gap-2">
+      <div className="flex items-center gap-6 ml-4 md:ml-10">
+        <button
+          onClick={() => { navigate("/"); closeMenu(); }}
+          className="flex items-center gap-2 cursor-pointer"
+        >
           <img
             alt="Dayma Logo"
-            className="h-10 w-auto"
+            className="h-8 w-auto md:h-10"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoB7XiPdETy2aWevGbbwB-iCIovm_HxYeKT8PCKcrbagaqpb2Ua36cs19dYnMNZY6H2SVKHJCfHnHNr3GUy7i-a-bsz2quon9ycqmgEiuXLq_3bzXupDeseEVlzhdnbTRQwbtV4r78ROBs2DA0jgX_QR65gJ2naFBOZg8oF06QxJO1DIwvdPGOfp8BLalYAFyOjUDemPuNeMP_tKglcHTwJG1aNthrKAIgzGJ1JFR99N-AZGhk3YSa"
           />
-          <span className="font-display-lg text-headline-lg text-primary italic">
+          <span className="font-display-lg text-headline-md md:text-headline-lg text-primary italic">
             Dayma
           </span>
-        </Link>
+        </button>
       </div>
 
+      {/* Desktop nav */}
       <nav className="hidden md:flex items-center gap-12">
-        <Link
-          to="/"
-          className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md"
+        <button
+          onClick={() => navigate("/")}
+          className={`font-label-md text-label-md cursor-pointer transition-colors ${
+            isActive("/")
+              ? "text-primary font-bold border-b-2 border-primary"
+              : "text-on-surface-variant hover:text-primary"
+          }`}
         >
-          Home
-        </Link>
-        <Link
-          to="/collection"
-          className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md"
+          Inicio
+        </button>
+        <button
+          onClick={() => navigate("/collection")}
+          className={`font-label-md text-label-md cursor-pointer transition-colors ${
+            isActive("/collection")
+              ? "text-primary font-bold border-b-2 border-primary"
+              : "text-on-surface-variant hover:text-primary"
+          }`}
         >
           Colecciones
-        </Link>
+        </button>
       </nav>
 
-      <div className="flex items-center gap-5 mr-10">
+      <div className="flex items-center gap-3 md:gap-5 mr-4 md:mr-10">
         {hasToken ? (
-          <Link
-            to="/account"
-            className="flex items-center gap-1 text-primary border-b-2 border-tertiary font-bold pb-1"
+          <button
+            onClick={() => { navigate("/account"); closeMenu(); }}
+            className="flex items-center gap-1 text-primary border-b-2 border-tertiary font-bold pb-1 cursor-pointer"
           >
             <span className="material-symbols-outlined">account_circle</span>
             <span className="font-label-md text-label-md ml-1 hidden sm:inline">
               Cuenta
             </span>
-          </Link>
+          </button>
         ) : (
-          <Link
-            to="/auth"
-            className="material-symbols-outlined text-primary hover:opacity-70 transition-opacity"
+          <button
+            onClick={() => { navigate("/auth"); closeMenu(); }}
+            className="material-symbols-outlined text-primary hover:opacity-70 transition-opacity cursor-pointer"
           >
             person
-          </Link>
+          </button>
         )}
-        <button className="material-symbols-outlined text-primary hover:opacity-70 transition-opacity">
+        <button onClick={openCart} className="relative material-symbols-outlined text-primary hover:opacity-70 transition-opacity cursor-pointer">
           shopping_bag
+          {itemCount > 0 && (
+            <span className="absolute -top-1 -right-2 bg-secondary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+              {itemCount}
+            </span>
+          )}
+        </button>
+        {/* Hamburger */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="flex md:hidden material-symbols-outlined text-primary"
+        >
+          {menuOpen ? "close" : "menu"}
         </button>
       </div>
+
+      {/* Mobile drawer */}
+      {menuOpen && (
+        <div className="fixed inset-0 top-[72px] z-40 bg-surface/95 backdrop-blur-xl flex flex-col items-center gap-8 py-12 md:hidden">
+          <button
+            onClick={() => { navigate("/"); closeMenu(); }}
+            className={`font-headline-md text-headline-md cursor-pointer ${
+              isActive("/") ? "text-primary font-bold" : "text-on-surface-variant"
+            }`}
+          >
+            Inicio
+          </button>
+          <button
+            onClick={() => { navigate("/collection"); closeMenu(); }}
+            className={`font-headline-md text-headline-md cursor-pointer ${
+              isActive("/collection") ? "text-primary font-bold" : "text-on-surface-variant"
+            }`}
+          >
+            Colecciones
+          </button>
+          {hasToken ? (
+            <button
+              onClick={() => { navigate("/account"); closeMenu(); }}
+              className="font-headline-md text-headline-md text-primary cursor-pointer"
+            >
+              Cuenta
+            </button>
+          ) : (
+            <button
+              onClick={() => { navigate("/auth"); closeMenu(); }}
+              className="font-headline-md text-headline-md text-primary cursor-pointer"
+            >
+              Iniciar sesión
+            </button>
+          )}
+        </div>
+      )}
     </header>
   );
 }
