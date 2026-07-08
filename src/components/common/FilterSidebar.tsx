@@ -1,3 +1,4 @@
+import { Select } from "antd";
 import type { ProductFilters } from "../../types/product";
 
 interface FilterOption {
@@ -27,22 +28,14 @@ export default function FilterSidebar({ filters, onFiltersChange, categories, si
 
       <div className="mb-8">
         <p className="font-label-md text-label-md text-secondary uppercase mb-4 tracking-wider">Categoría</p>
-        <ul className="space-y-3">
-          {categories.map((cat) => (
-            <li key={cat.code} className="flex items-center gap-3 min-h-[44px]">
-              <input
-                className="rounded-sm border-outline text-primary focus:ring-primary-container w-4 h-4"
-                id={`cat-${cat.code}`}
-                type="checkbox"
-                checked={(filters.categories ?? []).includes(cat.code)}
-                onChange={() => toggleArray("categories", cat.code)}
-              />
-              <label className="font-body-md text-body-md text-on-surface-variant" htmlFor={`cat-${cat.code}`}>
-                {cat.label}
-              </label>
-            </li>
-          ))}
-        </ul>
+        <Select
+          mode="multiple"
+          className="w-full"
+          placeholder="Seleccionar categorías"
+          value={filters.categories ?? []}
+          onChange={(val) => onFiltersChange({ ...filters, categories: val })}
+          options={categories.map((cat) => ({ label: cat.label, value: cat.code }))}
+        />
       </div>
 
       <div className="mb-8">
@@ -54,7 +47,7 @@ export default function FilterSidebar({ filters, onFiltersChange, categories, si
               <button
                 key={size.code}
                 type="button"
-                className={`px-3 py-3 text-center rounded-sm font-label-md text-label-md transition-colors ${
+                className={`px-3 py-4 text-center rounded-sm font-label-md text-label-md transition-colors ${
                   selected
                     ? "border border-primary bg-primary-container/10 text-primary"
                     : "border border-outline-variant hover:bg-surface-container-high"
@@ -73,7 +66,7 @@ export default function FilterSidebar({ filters, onFiltersChange, categories, si
         <p className="font-label-md text-label-md text-secondary uppercase mb-4 tracking-wider">Rango de Precio</p>
         <div className="flex items-center gap-3">
           <input
-            className="w-full border border-outline-variant rounded-sm px-4 py-3 font-body-md text-body-md bg-transparent"
+            className="w-full border border-outline-variant rounded-sm px-4 py-4 font-body-md text-body-md bg-transparent"
             type="number"
             placeholder="Min"
             min={0}
@@ -87,7 +80,7 @@ export default function FilterSidebar({ filters, onFiltersChange, categories, si
           />
           <span className="text-on-surface-variant">—</span>
           <input
-            className="w-full border border-outline-variant rounded-sm px-4 py-3 font-body-md text-body-md bg-transparent"
+            className="w-full border border-outline-variant rounded-sm px-4 py-4 font-body-md text-body-md bg-transparent"
             type="number"
             placeholder="Max"
             min={0}

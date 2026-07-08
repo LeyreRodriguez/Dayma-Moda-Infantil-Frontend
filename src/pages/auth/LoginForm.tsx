@@ -4,7 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 import type { LoginRequest } from "../../types/auth";
 
 const inputClass =
-  "!rounded-lg !border-stone-200 !bg-white !text-sm !py-2 focus:!border-green-900 focus:!ring-1 focus:!ring-green-900/40 !shadow-[inset_2px_2px_8px_rgba(0,0,0,0.02)]";
+  "!rounded-lg !border-stone-200 !bg-white !text-sm !py-3 focus:!border-green-900 focus:!ring-1 focus:!ring-green-900/40 !shadow-[inset_2px_2px_8px_rgba(0,0,0,0.02)]";
 
 export default function LoginForm() {
   const [form] = Form.useForm();
@@ -37,7 +37,7 @@ export default function LoginForm() {
         <Form.Item
           label={
             <span className="text-xs font-semibold tracking-widest uppercase text-stone-500">
-              Tu Correo Mágico
+              Tu Correo
             </span>
           }
           name="email"
@@ -60,7 +60,7 @@ export default function LoginForm() {
         <Form.Item
           label={
             <span className="text-xs font-semibold tracking-widest uppercase text-stone-500">
-              Llave Secreta
+              Contraseña
             </span>
           }
           name="password"

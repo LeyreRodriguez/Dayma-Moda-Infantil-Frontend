@@ -11,3 +11,10 @@ export interface FeaturedCollection {
   code: string;
   imageUrl: string;
 }
+
+export interface FeaturedCollection {
+  name: string;
+  description: string;
+  code: string;
+  imageUrl: string;
+}

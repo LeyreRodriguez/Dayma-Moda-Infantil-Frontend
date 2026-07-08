@@ -8,31 +8,34 @@ import type { Favourite } from "../types/favourite";
 import type { Order } from "../types/order";
 
 export default function Account() {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const { items: cartItems, total, finishPurchase, showOrderModal } = useCart();
 
   const [favourites, setFavourites] = useState<Favourite[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchOrders = () =>
+    orderService.getOrders().then(setOrders).catch(() => {});
+
   useEffect(() => {
-    Promise.all([favouriteService.getFavourites(), orderService.getOrders()])
-      .then(([favs, ords]) => {
+    Promise.all([favouriteService.getFavourites(), fetchOrders()])
+      .then(([favs]) => {
         setFavourites(favs.filter((f) => f.product));
-        setOrders(ords);
       })
       .catch((e) => {
         console.error("Account load error", e);
       })
       .finally(() => setLoading(false));
   }, []);
+  console.log(user);
 
   return (
     <div className="min-h-screen bg-background font-body-md text-on-surface pt-24 lg:pt-32 parchment-texture">
       <main className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-12 md:py-16">
         <section className="mb-16">
           <h1 className="font-display-lg text-display-lg text-primary mb-2">
-            Bienvenid@ de nuevo
+            Bienvenid{user?.name ? `o, ${user.name}` : "@ de nuevo"}
           </h1>
           <p className="font-body-lg text-on-surface-variant italic">
             Échale un vistazo a tus pedidos anteriores y a tus productos
@@ -75,10 +78,23 @@ export default function Account() {
               </div>
               <div className="space-y-6 max-h-80 overflow-y-auto custom-scrollbar">
                 {loading ? (
-                  <div className="flex justify-center py-8">
-                    <span className="material-symbols-outlined text-2xl text-primary animate-spin">
-                      refresh
-                    </span>
+                  <div className="space-y-6">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="bg-surface-container-high p-4 md:p-6 lg:p-8 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6 animate-pulse"
+                      >
+                        <div className="space-y-2 flex-1">
+                          <div className="h-4 w-32 bg-outline-variant/40 rounded" />
+                          <div className="h-4 w-40 bg-outline-variant/40 rounded" />
+                        </div>
+                        <div className="space-y-2 text-center">
+                          <div className="h-6 w-24 bg-outline-variant/40 rounded mx-auto md:mx-0" />
+                          <div className="h-4 w-20 bg-outline-variant/40 rounded mx-auto md:mx-0" />
+                        </div>
+                        <div className="h-10 w-32 bg-outline-variant/40 rounded-lg" />
+                      </div>
+                    ))}
                   </div>
                 ) : orders.length === 0 ? (
                   <p className="font-body-md text-on-surface-variant text-center py-8">
@@ -151,7 +167,7 @@ export default function Account() {
                         }}
                         className="px-8 py-3 bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:opacity-90 transition-opacity"
                       >
-                        View Details
+                        Ver Detalles
                       </button>
                     </div>
                   ))
@@ -166,10 +182,20 @@ export default function Account() {
                 </h2>
               </div>
               {loading ? (
-                <div className="flex justify-center py-12">
-                  <span className="material-symbols-outlined text-3xl text-primary animate-spin">
-                    refresh
-                  </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="bg-surface-container-lowest p-6 rounded-xl flex gap-4 animate-pulse"
+                    >
+                      <div className="w-24 h-24 bg-outline-variant/40 rounded-lg flex-shrink-0" />
+                      <div className="space-y-2 flex-1 py-2">
+                        <div className="h-4 w-32 bg-outline-variant/40 rounded" />
+                        <div className="h-4 w-24 bg-outline-variant/40 rounded" />
+                        <div className="h-4 w-20 bg-outline-variant/40 rounded mt-2" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : favourites.length === 0 ? (
                 <p className="font-body-md text-on-surface-variant text-center py-12">
@@ -214,16 +240,23 @@ export default function Account() {
           <aside className="lg:col-span-4 sticky top-32">
             <div className="bg-surface-container-high/40 p-4 md:p-6 lg:p-8 rounded-2xl backdrop-blur-sm">
               <h3 className="font-headline-md text-headline-md text-primary mb-8 flex items-center gap-3">
-                Shopping Cart
+                Carrito de la Compra
                 <span className="bg-secondary text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
                   {cartItems.length}
                 </span>
               </h3>
               {loading ? (
-                <div className="flex justify-center py-8">
-                  <span className="material-symbols-outlined text-2xl text-primary animate-spin">
-                    refresh
-                  </span>
+                <div className="space-y-6">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="flex gap-4 animate-pulse">
+                      <div className="w-20 h-20 bg-outline-variant/40 rounded-lg flex-shrink-0" />
+                      <div className="space-y-2 flex-1 py-2">
+                        <div className="h-4 w-28 bg-outline-variant/40 rounded" />
+                        <div className="h-4 w-20 bg-outline-variant/40 rounded" />
+                        <div className="h-4 w-16 bg-outline-variant/40 rounded mt-1" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : cartItems.length === 0 ? (
                 <p className="font-body-md text-on-surface-variant text-center py-8">
@@ -266,7 +299,10 @@ export default function Account() {
                   Envío calculado en el siguiente paso.
                 </p>
                 <button
-                  onClick={finishPurchase}
+                  onClick={async () => {
+                    await finishPurchase();
+                    fetchOrders();
+                  }}
                   disabled={cartItems.length === 0}
                   className="w-full py-4 bg-primary text-on-primary font-label-md text-label-md rounded-xl hover:shadow-lg transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
                 >

@@ -45,7 +45,7 @@ export default function ProductDetail() {
         setCollection(coll);
         setProductImages(imgs);
         setProductSizes(sizes);
-        setAllSizes(all.map((s) => s.size));
+        setAllSizes(all.map((s: { size: string }) => s.size));
         return productService.getAll({ collection: coll.name, limit: 5 });
       })
       .then((res) => {
@@ -55,20 +55,86 @@ export default function ProductDetail() {
       .finally(() => setLoading(false));
   }, [code, navigate]);
 
+  useEffect(() => {
+    const handlePurchase = () => {
+      if (!code) return;
+      productService
+        .getSizeByProductCode(code)
+        .then(setProductSizes)
+        .catch(() => {});
+    };
+    window.addEventListener("purchase-complete", handlePurchase);
+    return () =>
+      window.removeEventListener("purchase-complete", handlePurchase);
+  }, [code]);
+
   if (loading || !product) {
     return (
-      <div className="bg-background min-h-screen flex items-center justify-center">
-        <span className="material-symbols-outlined text-4xl text-primary animate-spin">
-          refresh
-        </span>
+      <div className="bg-background min-h-screen font-body-md">
+        <main className="pt-32 pb-section-padding px-margin-mobile md:px-margin-desktop max-w-[1440px] mx-auto">
+          <div className="flex items-center gap-2 mb-12 animate-pulse">
+            <div className="h-4 w-16 bg-outline-variant/40 rounded" />
+            <div className="h-4 w-4 bg-outline-variant/40 rounded" />
+            <div className="h-4 w-24 bg-outline-variant/40 rounded" />
+            <div className="h-4 w-4 bg-outline-variant/40 rounded" />
+            <div className="h-4 w-32 bg-outline-variant/40 rounded" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+            <div className="md:col-span-7">
+              <div className="w-full aspect-square bg-surface-container-high rounded-xl animate-pulse" />
+            </div>
+            <div className="md:col-span-5 flex flex-col gap-10">
+              <div className="space-y-4 animate-pulse">
+                <div className="h-4 w-24 bg-outline-variant/40 rounded" />
+                <div className="h-4 w-full bg-outline-variant/40 rounded" />
+                <div className="h-4 w-3/4 bg-outline-variant/40 rounded" />
+                <div className="h-8 w-48 bg-outline-variant/40 rounded mt-6" />
+              </div>
+              <div className="animate-pulse">
+                <div className="h-4 w-40 bg-outline-variant/40 rounded mb-4" />
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-14 bg-outline-variant/40 rounded" />
+                  ))}
+                </div>
+              </div>
+              <div className="animate-pulse">
+                <div className="h-14 w-full bg-outline-variant/40 rounded-lg" />
+              </div>
+              <div className="animate-pulse space-y-4 p-6 bg-surface-container rounded-xl">
+                <div className="h-6 w-40 bg-outline-variant/40 rounded" />
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 bg-outline-variant/40 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 w-32 bg-outline-variant/40 rounded" />
+                    <div className="h-4 w-full bg-outline-variant/40 rounded" />
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 bg-outline-variant/40 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 w-32 bg-outline-variant/40 rounded" />
+                    <div className="h-4 w-48 bg-outline-variant/40 rounded" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
 
-  const allImages = productImages.map((pi) => pi.image);
+  const allImages =
+    productImages.length > 0 && typeof productImages[0] === "string"
+      ? (productImages as unknown as string[])
+      : productImages.map((pi) => pi.image);
+  console.log(allImages);
+  console.log(productImages);
   const collectionName =
     collection?.name ?? product.collectionName ?? "Colección";
-  const availableSizes = new Set(productSizes.map((ps) => ps.size.size));
+  const sizesWithStock = productSizes.filter((ps) => ps.stock > 0);
+  const hasStock = sizesWithStock.length > 0;
 
   return (
     <div className="bg-background text-on-background font-body-md overflow-x-hidden selection:bg-primary/10 selection:text-primary">
@@ -114,28 +180,9 @@ export default function ProductDetail() {
                 </h1>
               </section>
 
-              <p className="font-headline-md text-primary mt-6">
+              <p className="text-4xl font-bold text-primary mt-6">
                 {product.price.toFixed(2).replace(".", ",")}€
               </p>
-              <div className="flex items-center gap-4 mt-6">
-                <div className="flex text-primary">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <span
-                      key={i}
-                      className="material-symbols-outlined text-lg"
-                      style={{
-                        fontVariationSettings:
-                          i < (product.rating ?? 4) ? "'FILL' 1" : "'FILL' 0",
-                      }}
-                    >
-                      star
-                    </span>
-                  ))}
-                </div>
-                <span className="text-on-surface-variant font-label-md">
-                  {product.reviews ?? 0} testimonios
-                </span>
-              </div>
             </header>
 
             <section>
@@ -146,7 +193,8 @@ export default function ProductDetail() {
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                 {allSizes.map((s) => {
-                  const available = availableSizes.has(s);
+                  const ps = productSizes.find((p) => p.size.size === s);
+                  const available = ps ? ps.stock > 0 : false;
                   return (
                     <div
                       key={s}
@@ -167,10 +215,10 @@ export default function ProductDetail() {
                             onChange={() => setSelectedSize(s)}
                           />
                           <label
-                            className="flex items-center justify-center h-14 rounded border cursor-pointer transition-all font-label-md peer-checked:bg-primary peer-checked:text-on-primary peer-checked:border-primary border-outline text-on-surface-variant hover:border-primary"
+                            className="flex flex-col items-center justify-center h-14 rounded border cursor-pointer transition-all font-label-md peer-checked:bg-primary peer-checked:text-on-primary peer-checked:border-primary border-outline text-on-surface-variant hover:border-primary"
                             htmlFor={`size-${s}`}
                           >
-                            {s}
+                            <span>{s}</span>
                           </label>
                         </>
                       ) : (
@@ -182,6 +230,11 @@ export default function ProductDetail() {
                   );
                 })}
               </div>
+              {!hasStock && (
+                <p className="mt-4 font-label-md text-secondary text-center">
+                  Este producto no tiene stock disponible
+                </p>
+              )}
             </section>
 
             <div className="flex flex-col gap-4">
@@ -204,13 +257,21 @@ export default function ProductDetail() {
                   setAddedFeedback(true);
                   setTimeout(() => setAddedFeedback(false), 2000);
                 }}
-                disabled={!selectedSize}
+                disabled={!selectedSize || !hasStock}
                 className="w-full bg-primary text-on-primary py-6 rounded-lg font-headline-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <span className="material-symbols-outlined">
-                  {addedFeedback ? "check" : "shopping_bag"}
+                  {!hasStock
+                    ? "block"
+                    : addedFeedback
+                      ? "check"
+                      : "shopping_bag"}
                 </span>
-                {addedFeedback ? "¡Añadido!" : "Añadir al carrito"}
+                {!hasStock
+                  ? "Sin stock"
+                  : addedFeedback
+                    ? "¡Añadido!"
+                    : "Añadir al carrito"}
               </button>
               {addedFeedback && (
                 <button
@@ -269,7 +330,7 @@ export default function ProductDetail() {
                     src="https://maps.google.com/maps?q=Dayma+Moda+Infantil&output=embed"
                     width="100%"
                     height="100%"
-                    style={{ border: 0, minHeight: "400px" }}
+                    style={{ border: 0, minHeight: "200px" }}
                     allowFullScreen
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
@@ -302,7 +363,7 @@ export default function ProductDetail() {
             <h2 className="font-display-lg text-primary text-center mb-16 italic">
               También te puede encantar...
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-gutter">
               {related.map((p) => (
                 <ProductCard key={p.code} product={p} />
               ))}

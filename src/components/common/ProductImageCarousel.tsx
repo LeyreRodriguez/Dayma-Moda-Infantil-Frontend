@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getImageUrl } from "../../api/httpClient";
 
 interface Props {
   images: string[];
@@ -8,10 +9,14 @@ interface Props {
 export default function ProductImageCarousel({ images, name }: Props) {
   const [current, setCurrent] = useState(0);
 
+  console.log(images);
+
   if (images.length === 0) {
     return (
       <div className="w-full aspect-[4/5] bg-surface-container-highest rounded-xl flex items-center justify-center">
-        <span className="material-symbols-outlined text-6xl text-outline">image</span>
+        <span className="material-symbols-outlined text-6xl text-outline">
+          image
+        </span>
       </div>
     );
   }
@@ -24,7 +29,7 @@ export default function ProductImageCarousel({ images, name }: Props) {
       <div className="relative group overflow-hidden rounded-xl bg-surface-container">
         <img
           className="w-full aspect-[4/5] object-cover transition-opacity duration-300"
-          src={images[current]}
+          src={getImageUrl(images[current])}
           alt={`${name} - imagen ${current + 1}`}
         />
         {images.length > 1 && (
@@ -46,10 +51,16 @@ export default function ProductImageCarousel({ images, name }: Props) {
                 <button
                   key={i}
                   onClick={() => setCurrent(i)}
-                  className={`w-3 h-3 rounded-full transition-all flex items-center justify-center ${
-                    i === current ? "bg-primary w-8" : "bg-on-surface/40 hover:bg-on-surface/60"
-                  }`}
-                />
+                  className="flex items-center justify-center p-2 min-w-[44px] min-h-[44px]"
+                >
+                  <span
+                    className={`rounded-full transition-all ${
+                      i === current
+                        ? "w-8 h-2 bg-primary"
+                        : "w-2 h-2 bg-on-surface/40"
+                    }`}
+                  />
+                </button>
               ))}
             </div>
           </>
@@ -63,10 +74,16 @@ export default function ProductImageCarousel({ images, name }: Props) {
               key={i}
               onClick={() => setCurrent(i)}
               className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                i === current ? "border-primary opacity-100" : "border-transparent opacity-60 hover:opacity-80"
+                i === current
+                  ? "border-primary opacity-100"
+                  : "border-transparent opacity-60 hover:opacity-80"
               }`}
             >
-              <img className="w-full h-full object-cover" src={img} alt={`${name} miniatura ${i + 1}`} />
+              <img
+                className="w-full h-full object-cover"
+                src={getImageUrl(img)}
+                alt={`${name} miniatura ${i + 1}`}
+              />
             </button>
           ))}
         </div>

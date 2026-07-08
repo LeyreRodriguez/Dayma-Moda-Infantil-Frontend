@@ -1,8 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../../hooks/useCart";
+import { useAuth } from "../../hooks/useAuth";
 
-export default function Header() {
+interface HeaderProps {
+  fixed?: boolean;
+}
+
+export default function Header({ fixed = true }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { openCart, itemCount } = useCart();
@@ -10,7 +15,11 @@ export default function Header() {
   const [hasToken, setHasToken] = useState(
     !!localStorage.getItem("auth_token"),
   );
+  const auth = useAuth();
+
   const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(72);
 
   const isActive = (path: string) =>
     path === "/"
@@ -21,24 +30,34 @@ export default function Header() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
+    const onResize = () => {
+      if (headerRef.current) setHeaderHeight(headerRef.current.offsetHeight);
+    };
     window.addEventListener("scroll", onScroll);
+    window.addEventListener("resize", onResize);
     const onAuth = () => setHasToken(!!localStorage.getItem("auth_token"));
     window.addEventListener("auth-change", onAuth);
+    onResize();
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
       window.removeEventListener("auth-change", onAuth);
     };
   }, []);
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop transition-all duration-500 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 ${
+      ref={headerRef}
+      className={`${fixed ? "fixed top-0 left-0" : ""} w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop transition-all duration-500 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 ${
         scrolled ? "py-2 shadow-sm bg-surface/95" : "py-4"
       }`}
     >
       <div className="flex items-center gap-6 ml-4 md:ml-10">
         <button
-          onClick={() => { navigate("/"); closeMenu(); }}
+          onClick={() => {
+            navigate("/");
+            closeMenu();
+          }}
           className="flex items-center gap-2 cursor-pointer"
         >
           <img
@@ -74,12 +93,27 @@ export default function Header() {
         >
           Colecciones
         </button>
+        {auth.user?.role === "ADMIN" && (
+          <button
+            onClick={() => navigate("/admin")}
+            className={`font-label-md text-label-md cursor-pointer transition-colors ${
+              isActive("/admin")
+                ? "text-primary font-bold border-b-2 border-primary"
+                : "text-on-surface-variant hover:text-primary"
+            }`}
+          >
+            Admin
+          </button>
+        )}
       </nav>
 
       <div className="flex items-center gap-3 md:gap-5 mr-4 md:mr-10">
         {hasToken ? (
           <button
-            onClick={() => { navigate("/account"); closeMenu(); }}
+            onClick={() => {
+              navigate("/account");
+              closeMenu();
+            }}
             className="flex items-center gap-1 text-primary border-b-2 border-tertiary font-bold pb-1 cursor-pointer"
           >
             <span className="material-symbols-outlined">account_circle</span>
@@ -89,13 +123,19 @@ export default function Header() {
           </button>
         ) : (
           <button
-            onClick={() => { navigate("/auth"); closeMenu(); }}
+            onClick={() => {
+              navigate("/auth");
+              closeMenu();
+            }}
             className="material-symbols-outlined text-primary hover:opacity-70 transition-opacity cursor-pointer"
           >
             person
           </button>
         )}
-        <button onClick={openCart} className="relative material-symbols-outlined text-primary hover:opacity-70 transition-opacity cursor-pointer">
+        <button
+          onClick={openCart}
+          className="relative material-symbols-outlined text-primary hover:opacity-70 transition-opacity cursor-pointer"
+        >
           shopping_bag
           {itemCount > 0 && (
             <span className="absolute -top-1 -right-2 bg-secondary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
@@ -114,34 +154,53 @@ export default function Header() {
 
       {/* Mobile drawer */}
       {menuOpen && (
-        <div className="fixed inset-0 top-[72px] z-40 bg-surface/95 backdrop-blur-xl flex flex-col items-center gap-8 py-12 md:hidden">
+        <div
+          className="fixed inset-0 z-40 bg-surface/95 backdrop-blur-xl flex flex-col items-center gap-8 py-12 md:hidden"
+          style={{ top: headerHeight }}
+        >
           <button
-            onClick={() => { navigate("/"); closeMenu(); }}
-            className={`font-headline-md text-headline-md cursor-pointer ${
-              isActive("/") ? "text-primary font-bold" : "text-on-surface-variant"
+            onClick={() => {
+              navigate("/");
+              closeMenu();
+            }}
+            className={`font-headline-md text-headline-md cursor-pointer py-3 ${
+              isActive("/")
+                ? "text-primary font-bold"
+                : "text-on-surface-variant"
             }`}
           >
             Inicio
           </button>
           <button
-            onClick={() => { navigate("/collection"); closeMenu(); }}
-            className={`font-headline-md text-headline-md cursor-pointer ${
-              isActive("/collection") ? "text-primary font-bold" : "text-on-surface-variant"
+            onClick={() => {
+              navigate("/collection");
+              closeMenu();
+            }}
+            className={`font-headline-md text-headline-md cursor-pointer py-3 ${
+              isActive("/collection")
+                ? "text-primary font-bold"
+                : "text-on-surface-variant"
             }`}
           >
             Colecciones
           </button>
           {hasToken ? (
             <button
-              onClick={() => { navigate("/account"); closeMenu(); }}
-              className="font-headline-md text-headline-md text-primary cursor-pointer"
+              onClick={() => {
+                navigate("/account");
+                closeMenu();
+              }}
+              className="font-headline-md text-headline-md text-primary cursor-pointer py-3"
             >
               Cuenta
             </button>
           ) : (
             <button
-              onClick={() => { navigate("/auth"); closeMenu(); }}
-              className="font-headline-md text-headline-md text-primary cursor-pointer"
+              onClick={() => {
+                navigate("/auth");
+                closeMenu();
+              }}
+              className="font-headline-md text-headline-md text-primary cursor-pointer py-3"
             >
               Iniciar sesión
             </button>

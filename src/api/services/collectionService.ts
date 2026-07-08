@@ -1,4 +1,4 @@
-import { get } from "../httpClient";
+import { get, post } from "../httpClient";
 import type { Collection, FeaturedCollection } from "../../types/collection";
 
 export const collectionService = {
@@ -13,4 +13,6 @@ export const collectionService = {
     return get<Collection>(`/collections/${productCode}`);
   },
 
+  create: (data: Omit<Collection, "code">) =>
+    post<Collection>("/collections", data),
 };

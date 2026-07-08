@@ -3,5 +3,6 @@ import type { Size } from "./size";
 
 export interface ProductSize {
   product : Product,
-  size : Size
+  size : Size,
+  stock : number,
 }

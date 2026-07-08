@@ -16,6 +16,8 @@ export interface AuthContextType {
   login: (data: LoginRequest) => Promise<void>;
   signup: (data: SignupRequest) => Promise<void>;
   logout: () => void;
+  googleLogin: (idToken: string) => Promise<void>;
+  googleSignup: (idToken: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -53,13 +55,21 @@ function extractUser(response: unknown): User | undefined {
       id: String(u.id ?? ""),
       email: String(u.email ?? ""),
       name: u.name as string | undefined,
+      role: u.role as string | undefined,
+      newsletter: u.newsletter as boolean | undefined,
     };
   }
 
   const id = String(r.id ?? r.userId ?? "");
   const email = String(r.email ?? r.username ?? r.mail ?? "");
   if (id || email) {
-    return { id, email, name: r.name as string | undefined };
+    return {
+      id,
+      email,
+      name: r.name as string | undefined,
+      role: r.role as string | undefined,
+      newsletter: r.newsletter as boolean | undefined,
+    };
   }
 
   return undefined;
@@ -95,18 +105,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!token) throw new Error("No token in response");
     localStorage.setItem("auth_token", token);
     window.dispatchEvent(new Event("auth-change"));
-    const userData = extractUser(response);
+    let userData = extractUser(response);
+    if (!userData || !userData.name) {
+      try {
+        userData = await authService.getProfile();
+      } catch {
+        // keep the original userData if profile fetch fails
+      }
+    }
     setUser(userData ?? { id: "", email: "" });
+    window.location.href = userData?.role === "ADMIN" ? "/admin" : "/";
   }, []);
 
   const signup = useCallback(async (data: SignupRequest) => {
-    const response = (await authService.signup(data)) as unknown;
+    await authService.signup(data);
+  }, []);
+
+  const googleLogin = useCallback(async (idToken: string) => {
+    const response = (await authService.googleLogin({ idToken })) as unknown;
     const token = extractToken(response);
     if (!token) throw new Error("No token in response");
     localStorage.setItem("auth_token", token);
     window.dispatchEvent(new Event("auth-change"));
-    const userData = extractUser(response);
+    let userData = extractUser(response);
+    if (!userData || !userData.name) {
+      try {
+        userData = await authService.getProfile();
+      } catch {
+        // keep the original userData if profile fetch fails
+      }
+    }
     setUser(userData ?? { id: "", email: "" });
+    window.location.href = userData?.role === "ADMIN" ? "/admin" : "/";
+  }, []);
+
+  const googleSignup = useCallback(async (idToken: string) => {
+    const response = (await authService.googleSignup({ idToken })) as unknown;
+    const token = extractToken(response);
+    if (!token) throw new Error("No token in response");
+    localStorage.setItem("auth_token", token);
+    window.dispatchEvent(new Event("auth-change"));
+    let userData = extractUser(response);
+    if (!userData || !userData.name) {
+      try {
+        userData = await authService.getProfile();
+      } catch {
+        // keep the original userData if profile fetch fails
+      }
+    }
+    setUser(userData ?? { id: "", email: "" });
+    window.location.href = userData?.role === "ADMIN" ? "/admin" : "/";
   }, []);
 
   const logout = useCallback(() => {
@@ -118,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, loading, login, signup, logout }}
+      value={{ user, isAuthenticated, loading, login, signup, googleLogin, googleSignup, logout }}
     >
       {children}
     </AuthContext.Provider>

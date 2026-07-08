@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { collectionService } from "../api/services/collectionService";
 import { productService } from "../api/services/productService";
+import { authService } from "../api/services/authService";
+import { useAuth } from "../hooks/useAuth";
 import type { Collection } from "../types/collection";
 
 const HERO_IMG =
@@ -24,7 +26,7 @@ export default function Home() {
 function HeroSection() {
   const navigate = useNavigate();
   return (
-    <section className=" bg-background text-on-background parchment-texture min-h-screen selection:bg-secondary-container selection:text-on-secondary-container relative min-h-[90vh] flex items-center overflow-hidden bg-surface-container-low">
+    <section className="bg-background text-on-background selection:bg-secondary-container selection:text-on-secondary-container relative min-h-[90vh] flex items-center overflow-hidden bg-surface-container-low">
       <div className="absolute inset-0 z-0 opacity-40">
         <img
           className="w-full h-full object-cover"
@@ -72,8 +74,8 @@ function HeroSection() {
               alt="Retrato infantil en lino"
             />
           </div>
-          <div className="absolute -bottom-8 -left-8 w-48 h-48 bg-secondary-container/20 -z-10" />
-          <div className="absolute -top-8 -right-8 w-32 h-32 bg-primary-container/10 -z-10" />
+          <div className="absolute -bottom-8 -left-8 w-36 sm:w-48 h-36 sm:h-48 bg-secondary-container/20 -z-10" />
+          <div className="absolute -top-8 -right-8 w-24 sm:w-32 h-24 sm:h-32 bg-primary-container/10 -z-10" />
         </div>
       </div>
     </section>
@@ -124,6 +126,7 @@ function CollectionsSection() {
               const res = await productService.getAll({
                 collection: col.code,
                 limit: 1,
+                archived: false,
               });
               const product = res.content?.[0];
               return product?.imageUrl ?? "";
@@ -288,6 +291,32 @@ function PickupSection() {
 }
 
 function NewsletterSection() {
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [subscribing, setSubscribing] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+
+  const alreadySubscribed = user?.newsletter === true && !subscribed;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      navigate("/auth");
+      return;
+    }
+    setSubscribing(true);
+    try {
+      await authService.subscribe();
+      setSubscribed(true);
+      setEmail("");
+    } catch {
+      // error is already handled by httpClient interceptor if 401
+    } finally {
+      setSubscribing(false);
+    }
+  };
+
   return (
     <section className="py-section-padding">
       <div className="max-w-5xl mx-auto px-margin-mobile md:px-margin-desktop">
@@ -305,19 +334,37 @@ function NewsletterSection() {
               directamente en tu buzón.
             </p>
           </div>
-          <form
-            className="flex flex-col md:flex-row gap-0 max-w-2xl mx-auto overflow-hidden"
-            style={{ border: "1px solid rgba(45,66,54,0.15)" }}
-          >
-            <input
-              className="flex-grow px-8 py-5 bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-outline italic"
-              placeholder="Tu correo electrónico..."
-              type="email"
-            />
-            <button className="bg-primary text-on-primary px-12 py-5 font-label-md uppercase tracking-widest hover:bg-primary/90 transition-colors">
-              Suscribirse
-            </button>
-          </form>
+          {subscribed ? (
+            <p className="font-headline-md text-primary">
+              ¡Te has suscrito correctamente!
+            </p>
+          ) : alreadySubscribed ? (
+            <p className="font-headline-md text-primary">
+              Ya estás suscrito a la newsletter
+            </p>
+          ) : (
+            <form
+              className="flex flex-col md:flex-row gap-3 md:gap-0 max-w-2xl mx-auto overflow-hidden"
+              style={{ border: "1px solid rgba(45,66,54,0.15)" }}
+              onSubmit={handleSubmit}
+            >
+              <input
+                className="flex-grow px-8 py-5 bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-outline italic"
+                placeholder="Tu correo electrónico..."
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <button
+                type="submit"
+                disabled={subscribing}
+                className="bg-primary text-on-primary px-12 py-5 font-label-md uppercase tracking-widest hover:bg-primary/90 transition-colors disabled:opacity-50"
+              >
+                {subscribing ? "Suscribiendo..." : "Suscribirse"}
+              </button>
+            </form>
+          )}
           <p className="font-caption text-caption text-outline uppercase tracking-widest">
             Respetamos tu paz. No enviamos spam.
           </p>

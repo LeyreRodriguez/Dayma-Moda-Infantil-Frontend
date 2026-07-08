@@ -33,7 +33,7 @@ export default function ProductCard({
         />
         <div className="absolute inset-0 bg-primary/5 opacity-0 md:group-hover:opacity-100 transition-opacity duration-300" />
         <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center md:translate-y-8 md:group-hover:translate-y-0 md:opacity-0 md:group-hover:opacity-100 transition-all duration-500">
-          <button className="bg-surface-bright text-primary px-6 py-3 rounded-full font-label-md text-label-md shadow-lg hover:bg-primary hover:text-on-primary transition-colors">
+          <button className="bg-surface-bright text-primary px-6 py-4 rounded-full font-label-md text-label-md shadow-lg hover:bg-primary hover:text-on-primary transition-colors">
             Vista Rápida
           </button>
           {isAuthenticated ? (

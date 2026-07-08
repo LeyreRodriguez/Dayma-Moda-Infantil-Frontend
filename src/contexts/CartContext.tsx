@@ -230,6 +230,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const snapshot = [...items];
     await shoppingCartService.finishPurchase();
     setItems([]);
+    window.dispatchEvent(new Event("purchase-complete"));
     setOrderModal({
       code: "",
       date: new Date().toISOString(),

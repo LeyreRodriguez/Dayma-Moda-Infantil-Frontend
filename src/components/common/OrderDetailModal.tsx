@@ -107,7 +107,7 @@ export default function OrderDetailModal({
 
         <button
           onClick={onClose}
-          className="w-full mt-6 bg-primary text-on-primary py-3 rounded-lg font-headline-md hover:opacity-90 transition-opacity"
+          className="w-full mt-6 bg-primary text-on-primary py-4 rounded-lg font-headline-md hover:opacity-90 transition-opacity"
         >
           Cerrar
         </button>

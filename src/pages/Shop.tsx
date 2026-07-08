@@ -79,6 +79,7 @@ export default function Shop() {
           sortBy,
           page: page - 1,
           limit: 6,
+          archived: false,
         });
         setProducts(res.content ?? []);
         setTotal(res.totalElements ?? 0);
@@ -237,11 +238,11 @@ export default function Shop() {
                 className="px-6 md:px-12 py-4 border border-primary text-primary font-label-md text-label-md rounded-full hover:bg-primary hover:text-on-primary transition-all duration-300 active:scale-95"
                 onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               >
-                Ver Más Tesoros
+                Ver Más
               </button>
-              <div className="flex items-center gap-4 text-on-surface-variant">
+              <div className="flex items-center justify-center gap-1 sm:gap-4 text-on-surface-variant flex-wrap">
                 <button
-                  className="p-2 hover:text-primary transition-colors disabled:opacity-30"
+                  className="p-2 hover:text-primary transition-colors disabled:opacity-30 min-w-[44px] min-h-[44px] flex items-center justify-center"
                   disabled={page <= 1}
                   onClick={() => setPage((p) => Math.max(p - 1, 1))}
                 >
@@ -249,11 +250,14 @@ export default function Shop() {
                     chevron_left
                   </span>
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (p) => (
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  const start = Math.max(1, Math.min(page - 2, totalPages - 4));
+                  const p = start + i;
+                  if (p > totalPages) return null;
+                  return (
                     <span
                       key={p}
-                      className={`font-label-md text-label-md px-2 cursor-pointer ${
+                      className={`font-label-md text-label-md min-w-[36px] min-h-[44px] flex items-center justify-center px-2 cursor-pointer ${
                         p === page
                           ? "border-b-2 border-primary text-primary"
                           : "hover:text-primary"
@@ -262,10 +266,13 @@ export default function Shop() {
                     >
                       {String(p).padStart(2, "0")}
                     </span>
-                  ),
-                )}
+                  );
+                })}
+                <span className="text-on-surface-variant/50 text-label-md hidden sm:inline">
+                  / {String(totalPages).padStart(2, "0")}
+                </span>
                 <button
-                  className="p-2 hover:text-primary transition-colors disabled:opacity-30"
+                  className="p-2 hover:text-primary transition-colors disabled:opacity-30 min-w-[44px] min-h-[44px] flex items-center justify-center"
                   disabled={page >= totalPages}
                   onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
                 >

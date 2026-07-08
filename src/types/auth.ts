@@ -2,6 +2,8 @@ export interface User {
   id: string;
   email: string;
   name?: string;
+  role?: string;
+  newsletter?: boolean;
 }
 
 export interface LoginRequest {
@@ -18,4 +20,8 @@ export interface SignupRequest {
 export interface AuthResponse {
   user: User;
   token: string;
+}
+
+export interface GoogleLoginRequest {
+  idToken: string;
 }
