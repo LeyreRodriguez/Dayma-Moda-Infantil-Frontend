@@ -13,7 +13,7 @@ const STUDIO_IMG =
 
 export default function Home() {
   return (
-    <main className="pt-24">
+    <main>
       <HeroSection />
       <InfoBar />
       <CollectionsSection />
@@ -26,7 +26,7 @@ export default function Home() {
 function HeroSection() {
   const navigate = useNavigate();
   return (
-    <section className="bg-background text-on-background selection:bg-secondary-container selection:text-on-secondary-container relative min-h-[90vh] flex items-center overflow-hidden bg-surface-container-low">
+    <section className="bg-background text-on-background selection:bg-secondary-container selection:text-on-secondary-container relative min-h-screen flex items-center overflow-hidden bg-surface-container-low pt-24">
       <div className="absolute inset-0 z-0 opacity-40">
         <img
           className="w-full h-full object-cover"
@@ -175,7 +175,9 @@ function CollectionsSection() {
           />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
           <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center space-y-4 p-6">
-            <h3 className="font-display-lg text-3xl md:text-5xl">{collections[2].name}</h3>
+            <h3 className="font-display-lg text-3xl md:text-5xl">
+              {collections[2].name}
+            </h3>
             <p className="font-body-md opacity-90 max-w-md">
               {collections[2].description}
             </p>
@@ -253,13 +255,23 @@ function PickupSection() {
                 <span className="material-symbols-outlined text-secondary text-2xl">
                   castle
                 </span>
-                <div>
-                  <h4 className="font-headline-md text-primary mb-2">
-                    Visítanos en Telde
-                  </h4>
-                  <p className="text-on-surface-variant">
-                    C/ Matías Zurita, nº 11. Local 1., Telde, España
-                  </p>
+                <div className="gap-2 m-2">
+                  <div>
+                    <h4 className="font-headline-md text-primary mb-2">
+                      Visítanos en Telde
+                    </h4>
+                    <p className="text-on-surface-variant mb-2">
+                      C/ Matías Zurita, nº 11. Local 1., Telde, España
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-label-md text-primary">
+                      Horario de Atención
+                    </p>
+                    <p className="font-body-md text-on-surface-variant">
+                      L-S: 10:00 - 13:00 / S: 17:00 - 20:00
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

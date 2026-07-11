@@ -98,12 +98,21 @@
   --text-caption--font-weight: 400;
 }
 
-.parchment-texture {
-  background-image: url("https://www.transparenttextures.com/patterns/paper.png");
+.animate-slide-in {
+  animation: slideIn 0.25s ease-out;
 }
 
-.hero-gradient {
-  background: linear-gradient(to right, rgba(251, 249, 244, 1) 30%, rgba(251, 249, 244, 0) 100%);
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.parchment-texture {
+  background-image: url("https://www.transparenttextures.com/patterns/paper.png");
 }
 
 .custom-scrollbar::-webkit-scrollbar {

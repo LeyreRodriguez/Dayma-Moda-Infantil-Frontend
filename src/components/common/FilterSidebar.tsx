@@ -1,4 +1,4 @@
-import { Select } from "antd";
+import { Select, Slider } from "antd";
 import type { ProductFilters } from "../../types/product";
 
 interface FilterOption {
@@ -64,36 +64,35 @@ export default function FilterSidebar({ filters, onFiltersChange, categories, si
 
       <div>
         <p className="font-label-md text-label-md text-secondary uppercase mb-4 tracking-wider">Rango de Precio</p>
-        <div className="flex items-center gap-3">
-          <input
-            className="w-full border border-outline-variant rounded-sm px-4 py-4 font-body-md text-body-md bg-transparent"
-            type="number"
-            placeholder="Min"
-            min={0}
-            value={filters.minPrice ?? ""}
-            onChange={(e) =>
-              onFiltersChange({
-                ...filters,
-                minPrice: e.target.value ? Number(e.target.value) : undefined,
-              })
-            }
-          />
-          <span className="text-on-surface-variant">—</span>
-          <input
-            className="w-full border border-outline-variant rounded-sm px-4 py-4 font-body-md text-body-md bg-transparent"
-            type="number"
-            placeholder="Max"
-            min={0}
-            value={filters.maxPrice ?? ""}
-            onChange={(e) =>
-              onFiltersChange({
-                ...filters,
-                maxPrice: e.target.value ? Number(e.target.value) : undefined,
-              })
-            }
-          />
+        <Slider
+          range
+          min={0}
+          max={200}
+          step={5}
+          defaultValue={[0, 200]}
+          onAfterChange={([min, max]) =>
+            onFiltersChange({
+              ...filters,
+              minPrice: min > 0 ? min : undefined,
+              maxPrice: max < 200 ? max : undefined,
+            })
+          }
+          className="mb-2"
+        />
+        <div className="flex justify-between text-sm text-on-surface-variant">
+          <span>{filters.minPrice ? `${filters.minPrice}€` : "0€"}</span>
+          <span>{filters.maxPrice ? `${filters.maxPrice}€` : "200€"}</span>
         </div>
       </div>
+
+      {(filters.categories?.length || filters.sizes?.length || filters.minPrice !== undefined || filters.maxPrice !== undefined || filters.collection) && (
+        <button
+          onClick={() => onFiltersChange({})}
+          className="w-full py-4 border border-outline-variant text-on-surface-variant font-label-md hover:border-primary hover:text-primary transition-colors"
+        >
+          Limpiar filtros
+        </button>
+      )}
     </div>
   );
 }

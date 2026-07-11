@@ -15,7 +15,6 @@ const SORT_OPTIONS = [
   { value: "newest", label: "Lo más nuevo" },
   { value: "price_asc", label: "Precio: Menor a Mayor" },
   { value: "price_desc", label: "Precio: Mayor a Menor" },
-  { value: "relevance", label: "Relevancia" },
 ];
 
 export default function Shop() {
@@ -28,7 +27,9 @@ export default function Shop() {
     const collection = searchParams.get("collection");
     return collection ? { collection } : {};
   });
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState(
+    () => searchParams.get("sort") || "newest",
+  );
   const [categories, setCategories] = useState<Category[]>([]);
   const [sizes, setSizes] = useState<Size[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -117,64 +118,57 @@ export default function Shop() {
               src={featuredProduct?.imageUrl}
               alt={featuredProduct?.name ?? "Colección"}
             />
-            <div className="absolute inset-0 hero-gradient hidden md:block" />
+            <div
+              className="absolute inset-0 hidden md:block"
+              style={{
+                background:
+                  "linear-gradient(to top, rgba(45,66,54,0.6), transparent)",
+              }}
+            />
           </div>
         </div>
       </header>
 
-      {/* Subcategory Carousel */}
-      <nav className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop mb-12">
-        <div className="relative flex items-center border-b border-outline-variant/10 pb-4">
-          <button
-            className="hidden md:flex items-center justify-center w-10 h-10 text-primary hover:bg-primary/5 rounded-full transition-colors flex-shrink-0"
-            onClick={() =>
-              scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" })
-            }
-          >
-            <span className="material-symbols-outlined">chevron_left</span>
-          </button>
-          <div
-            ref={scrollRef}
-            className="flex-1 overflow-x-auto scroll-smooth no-scrollbar"
-          >
-            <div className="flex items-center gap-x-10 px-4 whitespace-nowrap">
-              <button
-                className={`font-headline-md text-headline-md pb-2 transition-all duration-300 ${
-                  !filters.collection
-                    ? "text-primary border-b-2 border-primary"
-                    : "text-on-surface-variant hover:text-primary hover:scale-105"
-                }`}
-                onClick={() => handleCollectionChange("")}
-              >
+      {/* Collection Carousel */}
+      <nav className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop mb-16">
+        <div
+          ref={scrollRef}
+          className="overflow-x-auto scroll-smooth no-scrollbar"
+        >
+          <div className="flex items-center gap-3 px-2 whitespace-nowrap">
+            <button
+              className={`px-5 py-2.5 rounded-full font-label-md text-label-md transition-all duration-300 ${
+                !filters.collection
+                  ? "bg-primary text-on-primary shadow-sm"
+                  : "bg-surface-container text-on-surface-variant border border-outline-variant/40 hover:border-primary hover:text-primary hover:bg-primary/5"
+              }`}
+              onClick={() => handleCollectionChange("")}
+            >
+              <span className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-base">
+                  grid_view
+                </span>
                 Ver Todo
+              </span>
+            </button>
+            {collections.map((sc) => (
+              <button
+                key={sc.code}
+                className={`px-5 py-2.5 rounded-full font-label-md text-label-md transition-all duration-300 ${
+                  filters.collection === sc.code
+                    ? "bg-primary text-on-primary shadow-sm"
+                    : "bg-surface-container text-on-surface-variant border border-outline-variant/40 hover:border-primary hover:text-primary hover:bg-primary/5"
+                }`}
+                onClick={() => handleCollectionChange(sc.code)}
+              >
+                {sc.name}
               </button>
-              {collections.map((sc) => (
-                <button
-                  key={sc.code}
-                  className={`font-headline-md text-headline-md pb-2 transition-all duration-300 ${
-                    filters.collection === sc.code
-                      ? "text-primary border-b-2 border-primary"
-                      : "text-on-surface-variant hover:text-primary hover:scale-105"
-                  }`}
-                  onClick={() => handleCollectionChange(sc.code)}
-                >
-                  {sc.name}
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
-          <button
-            className="hidden md:flex items-center justify-center w-10 h-10 text-primary hover:bg-primary/5 rounded-full transition-colors flex-shrink-0"
-            onClick={() =>
-              scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" })
-            }
-          >
-            <span className="material-symbols-outlined">chevron_right</span>
-          </button>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row gap-gutter">
+      <main className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row gap-gutter pb-16 md:pb-24">
         <aside className="w-full md:w-64 flex-shrink-0">
           <FilterSidebar
             filters={filters}
@@ -219,10 +213,34 @@ export default function Shop() {
               </span>
             </div>
           ) : products.length === 0 ? (
-            <div className="text-center py-20">
+            <div className="text-center py-20 space-y-6">
+              <span className="material-symbols-outlined text-5xl text-outline">
+                search_off
+              </span>
               <p className="font-body-lg text-on-surface-variant">
-                No hay productos disponibles.
+                No hay productos con estos filtros.
               </p>
+              <p className="font-body-md text-outline max-w-md mx-auto">
+                Intenta limpiar los filtros o prueba con otros términos.
+              </p>
+              <button
+                onClick={() => {
+                  setFilters({});
+                  setSortBy("newest");
+                  setPage(1);
+                  const params = new URLSearchParams(searchParams);
+                  params.delete("sort");
+                  params.delete("collection");
+                  window.history.replaceState(
+                    null,
+                    "",
+                    `?${params.toString()}`,
+                  );
+                }}
+                className="mt-4 px-8 py-3 border border-primary text-primary font-label-md hover:bg-primary hover:text-on-primary transition-colors"
+              >
+                Limpiar filtros
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
