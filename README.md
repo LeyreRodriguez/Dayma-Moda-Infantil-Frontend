@@ -1,52 +1,51 @@
-# 🧸 Dayma Moda Infantil - Frontend
+# 🧸 Dayma Moda Infantil — Frontend
 
-Este repositorio contiene el frontend en desarrollo de la aplicación **Dayma Moda Infantil**, una plataforma web para la gestión de una tienda de ropa infantil ubicada en **Telde (Gran Canaria)**.
+Web de **Dayma Moda Infantil**, una tienda física de ropa y complementos para bebés y niños en
+**Telde (Gran Canaria)**. Tiene dos caras: un **catálogo online** para los clientes y un
+**panel de administración** para gestionar la tienda y el inventario.
 
----
+Backend: [Dayma-Moda-Infantil-Backend](https://github.com/LeyreRodriguez/Dayma-Moda-Infantil-Backend)
 
-## 🚧 Estado del proyecto
-
-⚠️ Este proyecto se encuentra actualmente en **fase de desarrollo activo**.
-
-Las funcionalidades pueden cambiar frecuentemente y aún no está listo para uso en producción.
 
 ---
 
-## 🎯 Objetivo
+## ✅ Estado
 
-El objetivo de esta aplicación es proporcionar una interfaz moderna y eficiente para:
-
-- Gestión de productos de la tienda
-- Visualización del catálogo de ropa infantil
-- Posible sistema de carrito de compra
-- Administración interna (panel de gestión)
-- Integración con una API REST backend
+**Terminado (junio 2026)** y desplegado en un **entorno de preproducción** para su validación
+con la propietaria de la tienda.
 
 ---
 
-## 🧱 Tecnologías utilizadas
+## 🎯 Funcionalidades
 
-- ⚛️ React (Vite)
-- 🎨 Tailwind CSS
-- 📦 Node.js + npm
-- 🌐 API REST (backend en desarrollo)
+**Para clientes**
+- Catálogo de productos por categorías.
+- **Encargos online para recoger en tienda.** No hay pasarela de pago: por política del
+  negocio, el pago se hace en la tienda al recoger el pedido.
 
----
-
-## 🏪 Sobre el proyecto
-
-**Dayma Moda Infantil** es una tienda física ubicada en **Telde (Gran Canaria)**, especializada en ropa y complementos infantiles.
-
-Este proyecto busca digitalizar parte de su gestión y, en el futuro, ofrecer una experiencia de compra online.
+**Modo administrador**
+- Gestión de productos y categorías.
+- Gestión de **inventario**: tallas, stock y precios.
 
 ---
 
-## ⚙️ Instalación y ejecución
+## 🧱 Tecnologías
 
-```bash
-npm install
-npm run dev
+- ⚛️ **React** + **TypeScript**
+- ⚡ **Vite**
+- 🎨 **Tailwind CSS**
+- 🌐 Consumo de la **API REST** del backend (Spring Boot)
 
 ---
 
-## DESARROLLADO POR LEYRE RODRIGUEZ
+## 🚀 Cómo ejecutarlo
+
+### Requisitos
+- Node.js 
+- El [backend](https://github.com/LeyreRodriguez/Dayma-Moda-Infantil-Backend) en marcha
+
+---
+
+Desarrollado por **Leyre Rodríguez Quintana** ·
+[LinkedIn](https://www.linkedin.com/in/leyrerodriguezquintana) ·
+[GitHub](https://github.com/LeyreRodriguez)
